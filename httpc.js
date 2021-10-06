@@ -27,9 +27,9 @@ yargs
       const myUrl = url.parse(argv.url);
       const client = net.connect(80, myUrl.host, function () {
         client.write(
-          `GET /get?${myUrl.query}} HTTP/1.1\n` + `Host: ${myUrl.host}\n\n`
+          `GET /get?${myUrl.query} HTTP/1.1\n` + `Host: ${myUrl.host}\n\n`
         );
-        console.log("Connected to server!");
+        console.log("Connected to server!\n");
       });
       client.on("data", function (data) {
         const dataString = data.toString();
@@ -52,7 +52,7 @@ yargs
         client.destroy();
       });
       client.on("end", function () {
-        console.log("disconnected from server");
+        console.log("Disconnected from server");
       });
       client.on("error", function () {
         console.log("Connection error");
@@ -81,10 +81,49 @@ yargs
     "Executes a HTTP POST request and posts the response",
     (yargs) => {},
     function handler(argv) {
+      // extract this to const for readibilty
+      const myUrl = url.parse(argv.url);
+      console.log(myUrl);
+      const client = net.connect(80, myUrl.host, function () {
+        client.write(`POST /post HTTP/1.1
+Host: httpbin.org
+Content-Type: application/json; charset=utf-8
+Content-Length: 17
+
+{"Assignment": 1}
+
+`);
+        console.log("Connected to server!");
+      });
+      client.on("data", function (data) {
+        const dataString = data.toString();
+        var linebreakpattern = "\r\n\r\n";    // FINE_I"LL_DO_IT_MYSELF.jpg
+        var header = dataString.substring(
+          0,
+          dataString.indexOf(linebreakpattern) + 0
+        );
+        var body = dataString.substring(
+          dataString.indexOf(linebreakpattern) + linebreakpattern.length
+        );
+        if (argv.v) {
+          console.log(header + "\n" + body);
+        } else {
+          console.log(body);
+        }
+        if (argv.h) {
+          console.log(`Header Mode Enabled`);
+        }
+        client.destroy();
+      });
+      client.on("end", function () {
+        console.log("Disconnected from server");
+      });
+      client.on("error", function () {
+        console.log("Connection error");
+      });
+
+      // dont touch from here on
       console.log(`Sending POST request to ${argv.url}`);
-      if (argv.v) {
-        console.log(`Verbose Mode Enabled`);
-      }
     }
   )
   .option("verbose", {
@@ -139,3 +178,4 @@ yargs.argv;
 // })
 //   .then((data) => console.log(`Finished recieving data: ${data}`))
 //   .catch((e) => console.log(`An error occured: ${e}`));
+//`GET /get?${myUrl.query}} HTTP/1.1\n` + `Host: ${myUrl.host}\n\n`
