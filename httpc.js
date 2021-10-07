@@ -33,7 +33,7 @@ yargs
       });
       client.on("data", function (data) {
         const dataString = data.toString();
-        var linebreakpattern = "\r\n\r\n";    // FINE_I"LL_DO_IT_MYSELF.jpg
+        var linebreakpattern = "\r\n\r\n"; // FINE_I"LL_DO_IT_MYSELF.jpg
         var header = dataString.substring(
           0,
           dataString.indexOf(linebreakpattern) + 0
@@ -45,9 +45,6 @@ yargs
           console.log(header + "\n" + body);
         } else {
           console.log(body);
-        }
-        if (argv.h) {
-          console.log(`Header Mode Enabled`);
         }
         client.destroy();
       });
@@ -83,21 +80,16 @@ yargs
     function handler(argv) {
       // extract this to const for readibilty
       const myUrl = url.parse(argv.url);
-      console.log(myUrl);
+      console.log(argv.d);
       const client = net.connect(80, myUrl.host, function () {
-        client.write(`POST /post HTTP/1.1
-Host: httpbin.org
-Content-Type: application/json; charset=utf-8
-Content-Length: 17
-
-{"Assignment": 1}
-
-`);
+        client.write(
+          `POST ${myUrl.path} HTTP/1.1\n` + `Host: ${myUrl.host}\n` + `Content-Type: application/json;\n` + `Content-Length: ${argv.d.length}` + `\r\n\r\n${argv.d}\n\n`
+        );
         console.log("Connected to server!");
       });
       client.on("data", function (data) {
         const dataString = data.toString();
-        var linebreakpattern = "\r\n\r\n";    // FINE_I"LL_DO_IT_MYSELF.jpg
+        var linebreakpattern = "\r\n\r\n"; // FINE_I"LL_DO_IT_MYSELF.jpg
         var header = dataString.substring(
           0,
           dataString.indexOf(linebreakpattern) + 0
@@ -109,9 +101,6 @@ Content-Length: 17
           console.log(header + "\n" + body);
         } else {
           console.log(body);
-        }
-        if (argv.h) {
-          console.log(`Header Mode Enabled`);
         }
         client.destroy();
       });
@@ -135,15 +124,15 @@ Content-Length: 17
   })
   .option("header", {
     alias: "h",
-    type: "key:value",
+    type: "string",
     description: "Associates headers to HTTP Request with the format",
-    //   default: false,
+    default: null,
   })
   .option("inline-data", {
     alias: "d",
     type: "string",
     description: "Associates an inline data to the body HTTP POST request.",
-    default: "Some String",
+    default: '{"Name": Justin Loh King Wei}',
   })
   .option("the-file", {
     alias: "f",
@@ -152,6 +141,7 @@ Content-Length: 17
       "Associates the content of a file to the body HTTP POST request",
     default: null,
   });
+
 yargs.argv;
 
 //https://thecodebarbarian.com/building-a-cli-tool-with-node-js.html
